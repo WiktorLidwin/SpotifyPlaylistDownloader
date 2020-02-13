@@ -97,9 +97,9 @@ app.use(express.static(path.join(__dirname, 'www')));
 // })
 
 
-//server.listen(port)
-//console.log('server started on port '/*+process.env.PORT ||*/ + port);
-server.listen(process.env.PORT);
+server.listen(port)
+console.log('server started on port '/*+process.env.PORT ||*/ + port);
+//server.listen(process.env.PORT);
 var username = '';
 io.sockets.on('connection', function (socket: any) {
   ss(socket).on('filedownload', function (stream: any, name: any, callback: any) {
