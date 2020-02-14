@@ -14,6 +14,7 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var ss = require('socket.io-stream');
 var ytdl = require('ytdl-core');
+var request = require('request');
 var ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 var ffmpeg = require('fluent-ffmpeg');
 var YouTube = require('youtube-node');
@@ -43,6 +44,16 @@ var LastYTCall = 0;
 var YTCallDelay = 10;
 var current_songs_downloading = 0;
 var MAXSONGSDOWNLOADEDATONCE = 50;
+var yts = require('yt-search');
+yts('savage boogie', function (err, r) {
+    if (err)
+        throw err;
+    var videos = r.videos;
+    videos.forEach(function (v) {
+        var views = String(v.views).padStart(1, ' ');
+        console.log(views + " | " + v.title + " (" + v.timestamp + ") | " + v.author.name);
+    });
+});
 //spotify shit
 // var spotifyApi = new SpotifyWebApi({
 //   clientId: '5a50ec388e014dda8c475275e7a39631',
@@ -90,9 +101,9 @@ app.use(express_1.default.static(path.join(__dirname, 'www')));
 //   res.writeHead(200, {'Content-disposition': 'attachment; filename=idk.txt'}); //here you can add more headers
 //   files.pipe(res)
 // })
-//server.listen(port);
-//console.log('server started on port ' /*+process.env.PORT ||*/ + port);
-server.listen(process.env.PORT);
+server.listen(port);
+console.log('server started on port ' /*+process.env.PORT ||*/ + port);
+//server.listen(process.env.PORT);
 var username = '';
 io.sockets.on('connection', function (socket) {
     ss(socket).on('filedownload', function (stream, name, callback) {
@@ -202,73 +213,95 @@ io.sockets.on('connection', function (socket) {
             var index = 0;
             var found = false;
             var youTube = new YouTube();
-            youTube.setKey('AlzpoeC49iwGtRPA9cuyeEdLDr_-nhOwyUXTbH0');
+            youTube.setKey('AIzaSyB1OOSpTREs85WUMvIgJvLTZKye4BVsoFU');
             ytsearch();
             function ytsearch() {
-                console.log("called yt search");
-                youTube.search(search, 2, function (error, result) {
-                    if (error) {
-                        console.log("really bad1");
-                        console.log(error);
-                        //ytsearch();
+                yts(search, function (err, r) {
+                    if (err)
+                        throw err;
+                    var videos = r.videos;
+                    var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    // videos.forEach( function ( v:any ) {
+                    //   const views = String( v.views ).padStart( 1, ' ' )
+                    //   console.log( `${ views } | ${ v.title } (${ v.timestamp }) | ${ v.author.name }` )
+                    // } )
+                    var temp1 = videos[0].videoId;
+                    if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
+                        current_songs_downloading++;
+                        console.log(temp1);
+                        downloadYTfile(temp1, filename, song_index);
                     }
-                    //exclude playlist cause they fuck shit up
                     else {
-                        while (found === false && index < 10) {
-                            if (error) {
-                                console.log("really bad2");
-                                console.log(error);
-                                //ytsearch();
-                            }
-                            else {
-                                //console.log(JSON.stringify(result.items[index].id.videoId, null, 2));
-                                if (JSON.stringify(result.items[index], null, 2) !== undefined && JSON.stringify(result.items[index].id.videoId, null, 2) !== undefined) {
-                                    var temp1 = JSON.stringify(result.items[index].id.videoId, null, 2).replace(/['"]+/g, '');
-                                    //console.log(")))))))))))))))))))))))")
-                                    //console.log(temp1)
-                                    // search = search.split(" ")
-                                    // for(let i = 0; i< search.length; i++){
-                                    //   if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|')
-                                    //   search.splice(i,1)
-                                    // }
-                                    // let i = search.length
-                                    // if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|'){
-                                    //   console.log("nigfa")
-                                    //   search.splice(i,1)
-                                    // }
-                                    // console.log(search)
-                                    // search.join('')
-                                    var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                                    if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
-                                        current_songs_downloading++;
-                                        console.log(temp1);
-                                        downloadYTfile(temp1, filename, song_index);
-                                    }
-                                    else {
-                                        console.log("stored");
-                                        SongsToDownload_Id.push(temp1);
-                                        SongsToDownload_FileName.push(filename);
-                                        SongsToDownload_Index.push(song_index);
-                                        SongsToDownload_Socket.push(socket.id);
-                                    }
-                                    found = true;
-                                }
-                                else {
-                                    console.log("bad" + index);
-                                    console.log(JSON.stringify(result.items));
-                                    index++;
-                                }
-                            }
-                        }
-                        if (index !== 0) {
-                            console.log(search + "  " + song_index);
-                        }
-                        if (index === 10) {
-                            console.log("bigboy " + search);
-                        }
+                        console.log("stored");
+                        SongsToDownload_Id.push(temp1);
+                        SongsToDownload_FileName.push(filename);
+                        SongsToDownload_Index.push(song_index);
+                        SongsToDownload_Socket.push(socket.id);
                     }
                 });
-                //downloadYTfile("FJt7gNi3Nr4")
+                // console.log("called yt search")
+                // youTube.search(search, 2, function (error: any, result: any) {
+                //   if (error) {
+                //     console.log("really bad1")
+                //     console.log(error);
+                //     //ytsearch();
+                //   }
+                //   //exclude playlist cause they fuck shit up
+                //   else {
+                //     while (found === false && index < 10) {
+                //       if (error) {
+                //         console.log("really bad2")
+                //         console.log(error);
+                //         //ytsearch();
+                //       }
+                //       else {
+                //         //console.log(JSON.stringify(result.items[index].id.videoId, null, 2));
+                //         if (JSON.stringify(result.items[index], null, 2) !== undefined && JSON.stringify(result.items[index].id.videoId, null, 2) !== undefined) {
+                //           let temp1 = JSON.stringify(result.items[index].id.videoId, null, 2).replace(/['"]+/g, '')
+                //           //console.log(")))))))))))))))))))))))")
+                //           //console.log(temp1)
+                //           // search = search.split(" ")
+                //           // for(let i = 0; i< search.length; i++){
+                //           //   if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|')
+                //           //   search.splice(i,1)
+                //           // }
+                //           // let i = search.length
+                //           // if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|'){
+                //           //   console.log("nigfa")
+                //           //   search.splice(i,1)
+                //           // }
+                //           // console.log(search)
+                //           // search.join('')
+                //           var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                //           if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
+                //             current_songs_downloading++
+                //             console.log(temp1)
+                //             //downloadYTfile(temp1, filename, song_index)
+                //           }
+                //           else {
+                //             console.log("stored")
+                //             SongsToDownload_Id.push(temp1);
+                //             SongsToDownload_FileName.push(filename);
+                //             SongsToDownload_Index.push(song_index);
+                //             SongsToDownload_Socket.push(socket.id)
+                //           }
+                //           found = true
+                //         }
+                //         else {
+                //           console.log("bad" + index)
+                //           console.log(JSON.stringify(result.items))
+                //           index++;
+                //         }
+                //       }
+                //     }
+                //     if (index !== 0) {
+                //       console.log(search + "  " + song_index)
+                //     }
+                //     if (index === 10) {
+                //       console.log("bigboy " + search)
+                //     }
+                //   }
+                // });
             }
         }
         function downloadYTfile(id, key, index) {
@@ -284,6 +317,8 @@ io.sockets.on('connection', function (socket) {
             temp = ss.createStream();
             ss(socket).emit('file', temp, key + ".mp3", index);
             //var outStream = fs.createWriteStream('test.txt');
+            // var x = request('http://www.youtube.com/embed/XGSy3_Czz8k')
+            // temp.pipe(x);
             var command = ffmpeg(stream)
                 .audioBitrate(128)
                 .format('mp3')
