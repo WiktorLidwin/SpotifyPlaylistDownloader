@@ -227,7 +227,7 @@ io.sockets.on('connection', function (socket: any) {
       let found = false
 
       var youTube = new YouTube();
-      youTube.setKey('AIzaSyB1OOSpTREs85WUMvIgJvLTZKye4BVsoFU');
+      youTube.setKey('AIzaSyDMpuHlzDjMEAFPl4D9uim-Tat0l65IfW8');
 
       ytsearch()
       function ytsearch() {
