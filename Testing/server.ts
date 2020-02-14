@@ -15,6 +15,7 @@ const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
 const YouTube = require('youtube-node');
 const fetch = require('node-fetch');
+const yts = require( 'yt-search' )
 var $ = require('jquery');
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 // console.log(ffmpegInstaller.path, ffmpegInstaller.version);
@@ -42,7 +43,7 @@ var YTCallDelay = 10;
 
 var current_songs_downloading = 0;
 const MAXSONGSDOWNLOADEDATONCE = 50;
-const yts = require( 'yt-search' )
+
 
 //spotify shit
 // var spotifyApi = new SpotifyWebApi({
