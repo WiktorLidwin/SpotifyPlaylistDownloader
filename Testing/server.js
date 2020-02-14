@@ -101,9 +101,9 @@ app.use(express_1.default.static(path.join(__dirname, 'www')));
 //   res.writeHead(200, {'Content-disposition': 'attachment; filename=idk.txt'}); //here you can add more headers
 //   files.pipe(res)
 // })
-server.listen(port);
-console.log('server started on port ' /*+process.env.PORT ||*/ + port);
-//server.listen(process.env.PORT);
+//server.listen(port);
+//console.log('server started on port ' /*+process.env.PORT ||*/ + port);
+server.listen(process.env.PORT);
 var username = '';
 io.sockets.on('connection', function (socket) {
     ss(socket).on('filedownload', function (stream, name, callback) {
