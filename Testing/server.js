@@ -19,6 +19,7 @@ var ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 var ffmpeg = require('fluent-ffmpeg');
 var YouTube = require('youtube-node');
 var fetch = require('node-fetch');
+var yts = require('yt-search');
 var $ = require('jquery');
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 // console.log(ffmpegInstaller.path, ffmpegInstaller.version);
@@ -44,16 +45,6 @@ var LastYTCall = 0;
 var YTCallDelay = 10;
 var current_songs_downloading = 0;
 var MAXSONGSDOWNLOADEDATONCE = 50;
-var yts = require('yt-search');
-yts('savage boogie', function (err, r) {
-    if (err)
-        throw err;
-    var videos = r.videos;
-    videos.forEach(function (v) {
-        var views = String(v.views).padStart(1, ' ');
-        console.log(views + " | " + v.title + " (" + v.timestamp + ") | " + v.author.name);
-    });
-});
 //spotify shit
 // var spotifyApi = new SpotifyWebApi({
 //   clientId: '5a50ec388e014dda8c475275e7a39631',
@@ -101,8 +92,8 @@ app.use(express_1.default.static(path.join(__dirname, 'www')));
 //   res.writeHead(200, {'Content-disposition': 'attachment; filename=idk.txt'}); //here you can add more headers
 //   files.pipe(res)
 // })
-//server.listen(port);
-//console.log('server started on port ' /*+process.env.PORT ||*/ + port);
+//server.listen(port)
+//console.log('server started on port '/*+process.env.PORT ||*/ + port);
 server.listen(process.env.PORT);
 var username = '';
 io.sockets.on('connection', function (socket) {
@@ -218,25 +209,27 @@ io.sockets.on('connection', function (socket) {
             function ytsearch() {
                 yts(search, function (err, r) {
                     if (err)
-                        throw err;
-                    var videos = r.videos;
-                    var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                    // videos.forEach( function ( v:any ) {
-                    //   const views = String( v.views ).padStart( 1, ' ' )
-                    //   console.log( `${ views } | ${ v.title } (${ v.timestamp }) | ${ v.author.name }` )
-                    // } )
-                    var temp1 = videos[0].videoId;
-                    if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
-                        current_songs_downloading++;
-                        console.log(temp1);
-                        downloadYTfile(temp1, filename, song_index);
-                    }
+                        console.log("error search:" + search);
                     else {
-                        console.log("stored");
-                        SongsToDownload_Id.push(temp1);
-                        SongsToDownload_FileName.push(filename);
-                        SongsToDownload_Index.push(song_index);
-                        SongsToDownload_Socket.push(socket.id);
+                        var videos = r.videos;
+                        var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        // videos.forEach( function ( v:any ) {
+                        //   const views = String( v.views ).padStart( 1, ' ' )
+                        //   console.log( `${ views } | ${ v.title } (${ v.timestamp }) | ${ v.author.name }` )
+                        // } )
+                        var temp1 = videos[0].videoId;
+                        if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
+                            current_songs_downloading++;
+                            console.log(temp1);
+                            downloadYTfile(temp1, filename, song_index);
+                        }
+                        else {
+                            console.log("stored");
+                            SongsToDownload_Id.push(temp1);
+                            SongsToDownload_FileName.push(filename);
+                            SongsToDownload_Index.push(song_index);
+                            SongsToDownload_Socket.push(socket.id);
+                        }
                     }
                 });
                 // console.log("called yt search")
