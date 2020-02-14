@@ -4,6 +4,8 @@ import pprint
 import sys
 import webbrowser
 import spotipy.util as util 
+import unicodedata
+
 
 export_data = []
 
@@ -39,5 +41,14 @@ playlists = sp.user_playlists(sys.argv[1])
 username = sys.argv[1]
 playlist = sys.argv[2]
 print_playlist(playlist)
-
-print (export_data)
+listToStr = ' '.join(map(str, export_data)) 
+f = open("playlist.txt", "a")
+y = []
+for  i in export_data:
+    z = unicodedata.normalize('NFKD', i).encode('ascii','ignore')
+    a = str(z)[2:1]
+    
+    f.write(a)
+    y.append(a)
+f.close()
+print (y)

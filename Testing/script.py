@@ -39,5 +39,9 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager) #spo
 playlists = sp.user_playlists(sys.argv[1])
 username = sys.argv[1]
 export_playlists(playlists)
+listToStr = ' '.join(map(str, export_data)) 
+f = open("test.txt", "a")
+f.write(listToStr)
+f.close()
 
 print (export_data)

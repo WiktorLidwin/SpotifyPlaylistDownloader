@@ -101,9 +101,9 @@ app.use(express.static(path.join(__dirname, 'www')));
 // })
 
 
-//server.listen(port)
-//console.log('server started on port '/*+process.env.PORT ||*/ + port);
-server.listen(process.env.PORT);
+server.listen(port)
+console.log('server started on port '/*+process.env.PORT ||*/ + port);
+//server.listen(process.env.PORT);
 var username = '';
 io.sockets.on('connection', function (socket: any) {
   ss(socket).on('filedownload', function (stream: any, name: any, callback: any) {
@@ -236,7 +236,9 @@ io.sockets.on('connection', function (socket: any) {
       ytsearch()
       function ytsearch() {
         yts( search, function ( err:any, r:any ) {
-          if ( err ) throw err
+          if (err)
+        console.log("error search:"+search)
+    else{
          
           let videos = r.videos
           var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -259,7 +261,8 @@ io.sockets.on('connection', function (socket: any) {
                         SongsToDownload_Socket.push(socket.id)
                       }
 
-        } )
+        }
+      } )
         // console.log("called yt search")
         // youTube.search(search, 2, function (error: any, result: any) {
         //   if (error) {
