@@ -202,7 +202,7 @@ io.sockets.on('connection', function (socket) {
             var index = 0;
             var found = false;
             var youTube = new YouTube();
-            youTube.setKey('AlzaSyCqhjgrPTPSOFyLyos5gfN47TJ0HnNA_LA');
+            youTube.setKey('AlzpoeC49iwGtRPA9cuyeEdLDr_-nhOwyUXTbH0');
             ytsearch();
             function ytsearch() {
                 console.log("called yt search");
