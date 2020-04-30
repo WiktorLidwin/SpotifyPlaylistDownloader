@@ -38,7 +38,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs-client": "^0.1.1",
     "horizon-youtube-mp3": "^1.9.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "node-fetch": "^2.6.0",
     "python-shell": "^1.0.8",
     "shortid": "^2.2.15",
