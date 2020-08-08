@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "component-bind": "~1.0.0",
-    "debug": "~2.2.0"
+    "debug": "~4.1.1"
   },
   "deprecated": false,
   "description": "stream for socket.io",
