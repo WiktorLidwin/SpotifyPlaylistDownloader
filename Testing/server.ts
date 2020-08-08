@@ -10,10 +10,12 @@ var server = http.createServer(app)
 var io = require('socket.io').listen(server)
 var ss = require('socket.io-stream');
 var ytdl = require('ytdl-core')
+var request = require('request');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
 const YouTube = require('youtube-node');
 const fetch = require('node-fetch');
+const yts = require( 'yt-search' )
 var $ = require('jquery');
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 // console.log(ffmpegInstaller.path, ffmpegInstaller.version);
@@ -41,6 +43,8 @@ var YTCallDelay = 10;
 
 var current_songs_downloading = 0;
 const MAXSONGSDOWNLOADEDATONCE = 50;
+
+
 //spotify shit
 // var spotifyApi = new SpotifyWebApi({
 //   clientId: '5a50ec388e014dda8c475275e7a39631',
@@ -231,72 +235,99 @@ io.sockets.on('connection', function (socket: any) {
 
       ytsearch()
       function ytsearch() {
-        console.log("called yt search")
-        youTube.search(search, 2, function (error: any, result: any) {
-          if (error) {
-            console.log("really bad1")
-            console.log(error);
-            //ytsearch();
-          }
-          //exclude playlist cause they fuck shit up
-          else {
-            while (found === false && index < 10) {
-              if (error) {
-                console.log("really bad2")
-                console.log(error);
-                //ytsearch();
-              }
-              else {
+        yts( search, function ( err:any, r:any ) {
+          if (err)
+        console.log("error search:"+search)
+    else{
+         
+          let videos = r.videos
+          var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          // videos.forEach( function ( v:any ) {
+          //   const views = String( v.views ).padStart( 1, ' ' )
+          //   console.log( `${ views } | ${ v.title } (${ v.timestamp }) | ${ v.author.name }` )
+          // } )
+          let temp1 = videos[0].videoId;
+          if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
 
-                //console.log(JSON.stringify(result.items[index].id.videoId, null, 2));
-                if (JSON.stringify(result.items[index], null, 2) !== undefined && JSON.stringify(result.items[index].id.videoId, null, 2) !== undefined) {
-                  let temp1 = JSON.stringify(result.items[index].id.videoId, null, 2).replace(/['"]+/g, '')
-                  //console.log(")))))))))))))))))))))))")
-                  //console.log(temp1)
-                  // search = search.split(" ")
-                  // for(let i = 0; i< search.length; i++){
-                  //   if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|')
-                  //   search.splice(i,1)
-                  // }
-                  // let i = search.length
-                  // if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|'){
-                  //   console.log("nigfa")
-                  //   search.splice(i,1)
-                  // }
-                  // console.log(search)
-                  // search.join('')
-                  var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        current_songs_downloading++
+                        console.log(temp1)
+                        downloadYTfile(temp1, filename, song_index)
+                      }
+                      else {
+                        console.log("stored")
+                        SongsToDownload_Id.push(temp1);
+                        SongsToDownload_FileName.push(filename);
+                        SongsToDownload_Index.push(song_index);
+                        SongsToDownload_Socket.push(socket.id)
+                      }
 
-                  if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
-                    current_songs_downloading++
-                    console.log(temp1)
-                    downloadYTfile(temp1, filename, song_index)
-                  }
-                  else {
-                    console.log("stored")
-                    SongsToDownload_Id.push(temp1);
-                    SongsToDownload_FileName.push(filename);
-                    SongsToDownload_Index.push(song_index);
-                    SongsToDownload_Socket.push(socket.id)
-                  }
-                  found = true
-                }
-                else {
-                  console.log("bad" + index)
-                  console.log(JSON.stringify(result.items))
-                  index++;
-                }
-              }
-            }
-            if (index !== 0) {
-              console.log(search + "  " + song_index)
-            }
-            if (index === 10) {
-              console.log("bigboy " + search)
-            }
-          }
-        });
-        //downloadYTfile("FJt7gNi3Nr4")
+        }
+      } )
+        // console.log("called yt search")
+        // youTube.search(search, 2, function (error: any, result: any) {
+        //   if (error) {
+        //     console.log("really bad1")
+        //     console.log(error);
+        //     //ytsearch();
+        //   }
+        //   //exclude playlist cause they fuck shit up
+        //   else {
+        //     while (found === false && index < 10) {
+        //       if (error) {
+        //         console.log("really bad2")
+        //         console.log(error);
+        //         //ytsearch();
+        //       }
+        //       else {
+
+        //         //console.log(JSON.stringify(result.items[index].id.videoId, null, 2));
+        //         if (JSON.stringify(result.items[index], null, 2) !== undefined && JSON.stringify(result.items[index].id.videoId, null, 2) !== undefined) {
+        //           let temp1 = JSON.stringify(result.items[index].id.videoId, null, 2).replace(/['"]+/g, '')
+        //           //console.log(")))))))))))))))))))))))")
+        //           //console.log(temp1)
+        //           // search = search.split(" ")
+        //           // for(let i = 0; i< search.length; i++){
+        //           //   if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|')
+        //           //   search.splice(i,1)
+        //           // }
+        //           // let i = search.length
+        //           // if(search[i]==='\n' || search[i]==='.' || search[i]==='*' || search[i]==='/' || search[i]==='\\'|| search[i]===':'|| search[i]==='?'|| search[i]==='>'|| search[i]==='<'|| search[i]==='|'){
+        //           //   console.log("nigfa")
+        //           //   search.splice(i,1)
+        //           // }
+        //           // console.log(search)
+        //           // search.join('')
+        //           var filename = search.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+        //           if (current_songs_downloading <= MAXSONGSDOWNLOADEDATONCE) {
+        //             current_songs_downloading++
+        //             console.log(temp1)
+        //             //downloadYTfile(temp1, filename, song_index)
+        //           }
+        //           else {
+        //             console.log("stored")
+        //             SongsToDownload_Id.push(temp1);
+        //             SongsToDownload_FileName.push(filename);
+        //             SongsToDownload_Index.push(song_index);
+        //             SongsToDownload_Socket.push(socket.id)
+        //           }
+        //           found = true
+        //         }
+        //         else {
+        //           console.log("bad" + index)
+        //           console.log(JSON.stringify(result.items))
+        //           index++;
+        //         }
+        //       }
+        //     }
+        //     if (index !== 0) {
+        //       console.log(search + "  " + song_index)
+        //     }
+        //     if (index === 10) {
+        //       console.log("bigboy " + search)
+        //     }
+        //   }
+        // });
 
       }
     }
@@ -315,6 +346,8 @@ io.sockets.on('connection', function (socket: any) {
 
       ss(socket).emit('file', temp, key + ".mp3", index);
       //var outStream = fs.createWriteStream('test.txt');
+      // var x = request('http://www.youtube.com/embed/XGSy3_Czz8k')
+      // temp.pipe(x);
 
       var command = ffmpeg(stream)
         .audioBitrate(128)
