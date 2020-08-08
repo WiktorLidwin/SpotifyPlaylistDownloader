@@ -17,6 +17,7 @@ let songs_to_download = [];
 let selection_table_over = false;
 
 
+
 document.getElementById("button1").style.visibility = "hidden";
 
 window.onload = function () {

@@ -27,6 +27,7 @@ function BlobReadStream(blob, options) {
 
   Readable.call(this, options);
 
+  
   options = options || {};
   this.blob = blob;
   this.slice = blob.slice || blob.webkitSlice || blob.mozSlice;

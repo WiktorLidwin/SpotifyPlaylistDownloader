@@ -1,3 +1,4 @@
+
 var util = require('util');
 var Duplex = require('stream').Duplex;
 var bind = require('component-bind');

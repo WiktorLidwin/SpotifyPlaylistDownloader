@@ -1,3 +1,4 @@
+
 // UUID function from https://gist.github.com/jed/982883
 // More lightweight than node-uuid
 function b(

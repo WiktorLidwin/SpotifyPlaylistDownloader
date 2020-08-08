@@ -30,6 +30,7 @@ io.of('/user').on('connection', function(socket) {
     stream.pipe(fs.createWriteStream(filename));
   });
 });
+
 ```
 
 `createStream()` returns a new stream which can be sent by `emit()`.
