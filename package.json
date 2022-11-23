@@ -42,7 +42,7 @@
     "node-fetch": "^2.6.0",
     "python-shell": "^1.0.8",
     "shortid": "^2.2.15",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.5.0",
     "socket.io-file": "^2.0.31",
     "socket.io-file-client": "^2.0.2",
     "socket.io-stream": "^0.9.1",
