@@ -33,7 +33,7 @@
     "@types/fluent-ffmpeg": "^2.1.13",
     "@types/jquery": "^3.3.31",
     "debug": "=2.6.9",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "fs-client": "^0.1.1",
